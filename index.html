@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Airlines Reservation System</title>
+
+<style>
+body{
+  font-family: Arial;
+  margin:0;
+  color:white;
+  background-image:url('https://images.pexels.com/photos/46148/aircraft-jet-landing-cloud-46148.jpeg');
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+  height:100vh;
+}
+
+body::before{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  z-index:-1;
+}
+
+.container{
+  width:60%;
+  margin:auto;
+  margin-top:60px;
+  background:rgba(0,0,0,0.7);
+  padding:20px;
+  border-radius:10px;
+}
+
+.form{ display:none; }
+#login{ display:block; }
+
+input,select{
+  width:100%;
+  padding:10px;
+  margin:8px 0;
+  border:none;
+  border-radius:5px;
+}
+
+button{
+  padding:10px;
+  background:#00ffd5;
+  border:none;
+  cursor:pointer;
+  width:100%;
+  border-radius:5px;
+}
+
+.seat{
+  display:inline-block;
+  width:60px;
+  margin:5px;
+  padding:10px;
+  background:gray;
+  text-align:center;
+  cursor:pointer;
+  border-radius:5px;
+}
+
+.selected{
+  background:#00ffd5;
+  color:black;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="login" class="form">
+<h2>Login</h2>
+<input id="l_email" placeholder="Email">
+<input id="l_pass" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<p onclick="show('register')">Register</p>
+</div>
+
+<!-- REGISTER -->
+<div id="register" class="form">
+<h2>Register</h2>
+<input id="r_name" placeholder="Full Name">
+<input id="r_mobile" placeholder="Mobile Number">
+<button onclick="register()">Register</button>
+<p onclick="show('login')">Login</p>
+</div>
+
+<!-- BOOK -->
+<div id="book" class="form">
+<h2>Booking</h2>
+<input id="from" placeholder="From">
+<input id="to" placeholder="To">
+<input id="date" type="date">
+
+<select id="cls">
+<option>Economy</option>
+<option>Business</option>
+<option>First Class</option>
+</select>
+
+<button onclick="seats()">Next</button>
+</div>
+
+<!-- SEATS -->
+<div id="seat" class="form">
+<h2>Select Seat (50 seats)</h2>
+<div id="seatBox"></div>
+<button onclick="payment()">Next</button>
+</div>
+
+<!-- PAYMENT -->
+<div id="pay" class="form">
+<h2>Payment</h2>
+
+<select id="payMethod">
+<option>UPI</option>
+<option>Credit Card</option>
+<option>Debit Card</option>
+<option>Net Banking</option>
+</select>
+
+<input id="payInput" placeholder="Enter Details">
+<button onclick="confirmBooking()">Pay</button>
+</div>
+
+<!-- RECEIPT -->
+<div id="final" class="form">
+<h2>Booking Receipt</h2>
+<div id="receipt"></div>
+</div>
+
+</div>
+
+<script>
+let users = {};
+let user = {};
+let seatSel = "";
+
+// SWITCH PAGE
+function show(id){
+  document.querySelectorAll('.form').forEach(d => d.style.display='none');
+  document.getElementById(id).style.display='block';
+}
+
+// REGISTER
+function register(){
+  let name = document.getElementById("r_name").value;
+  let mobile = document.getElementById("r_mobile").value;
+
+  users["temp"] = { name, mobile };
+
+  alert("Registered! Now login with Email & Password");
+  show('login');
+}
+
+// LOGIN
+function login(){
+  let email = document.getElementById("l_email").value;
+  let pass = document.getElementById("l_pass").value;
+
+  if(users["temp"]){
+    users[email] = {
+      name: users["temp"].name,
+      mobile: users["temp"].mobile,
+      email: email,
+      pass: pass
+    };
+    delete users["temp"];
+  }
+
+  if(users[email] && users[email].pass === pass){
+    user = users[email];
+    show('book');
+  } else {
+    alert("Wrong Email or Password");
+  }
+}
+
+// SEATS
+function seats(){
+  show('seat');
+  let box = document.getElementById("seatBox");
+  box.innerHTML = "";
+
+  for(let i=1;i<=50;i++){
+    let s = document.createElement("div");
+    s.className = "seat";
+    s.innerText = "S" + i;
+
+    s.onclick = function(){
+      document.querySelectorAll('.seat').forEach(x => x.classList.remove('selected'));
+      s.classList.add('selected');
+      seatSel = s.innerText;
+    };
+
+    box.appendChild(s);
+  }
+}
+
+// PAYMENT
+function payment(){
+  if(!seatSel){
+    alert("Select a seat first");
+    return;
+  }
+  show('pay');
+}
+
+// FINAL RECEIPT
+function confirmBooking(){
+
+  let data = `
+  <h3>Ticket Details</h3>
+  Name: ${user.name}<br>
+  Mobile: ${user.mobile}<br>
+  Email: ${user.email}<br>
+  From: ${document.getElementById("from").value}<br>
+  To: ${document.getElementById("to").value}<br>
+  Date: ${document.getElementById("date").value}<br>
+  Class: ${document.getElementById("cls").value}<br>
+  Seat: ${seatSel}<br>
+  Payment: ${document.getElementById("payMethod").value}<br>
+  Status: SUCCESS<br>
+  `;
+
+  document.getElementById("receipt").innerHTML = data;
+  show('final');
+}
+
+show('login');
+</script>
+
+</body>
+</html>
